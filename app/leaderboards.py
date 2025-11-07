@@ -1,14 +1,10 @@
-from flask import render_template, Blueprint, redirect, url_for, request, abort, flash, make_response, current_app
-from flask_user import login_required, current_user
+from flask import render_template, Blueprint, url_for, request, current_app
+from flask_user import login_required
 from datatables import ColumnDT, DataTables
-import time
+import time, datetime
 from app.models import CharacterInfo, Leaderboard, db
 from app.forms import LeaderboardsForm
-from app import gm_level, log_audit
 from app.luclient import translate_from_locale
-import xmltodict
-import xml.etree.ElementTree as ET
-import json
 
 leaderboards_blueprint = Blueprint('leaderboards', __name__)
 
@@ -42,20 +38,12 @@ def index(id=1):
     return render_template(
         'leaderboards/index.html.j2',
         form = form,
-        id = id
+        id = id,
     )
 
 @leaderboards_blueprint.route('/get/<id>', methods=['GET'])
 @login_required
 def get(id):
-    # https://explorer.lu/activities
-    # foot races counting seconds elapsed: 1 46 47 49 53
-    # foot races counting time left: 48
-    # race tracks: 39 42 54 60
-    #leaderboards_data = Leaderboard.query.filter(
-    #    Leaderboard.game_id == id_
-    #).all()
-    # Category determines what columns are displayed
     columns = [
         ColumnDT(Leaderboard.character_id),    # 0
         ColumnDT(Leaderboard.primaryScore),    # 1
@@ -63,8 +51,10 @@ def get(id):
         ColumnDT(Leaderboard.tertiaryScore),   # 3
         ColumnDT(Leaderboard.timesPlayed),     # 4
         ColumnDT(Leaderboard.last_played),     # 5
-        ColumnDT(CharacterInfo.name),          # 6
-        ColumnDT(Leaderboard.game_id)          # 7
+        ColumnDT(Leaderboard.last_played),     # 6
+        ColumnDT(CharacterInfo.name),          # 7
+        ColumnDT(Leaderboard.game_id),         # 8
+        ColumnDT(Leaderboard.last_played),     # 9
     ]
     query = db.session.query().select_from(Leaderboard).join(CharacterInfo).filter((Leaderboard.game_id == id) & (CharacterInfo.id == Leaderboard.character_id))
     params = request.args.to_dict()
@@ -76,7 +66,9 @@ def get(id):
             <div class="d-none">{id}</div>
             <a role="button" class="btn btn-primary btn btn-block"
                 href='{url_for('characters.view', id=id)}'>
-                {leaderboard["6"]}
+                {leaderboard["7"]}
             </a>
         """
+        days = (datetime.datetime.today() - leaderboard["6"]).days
+        leaderboard["9"] = days
     return data

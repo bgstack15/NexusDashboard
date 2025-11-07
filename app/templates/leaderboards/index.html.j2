@@ -28,64 +28,112 @@
             <th id="score3">hidden</th>
             <th>Times played</th>
             <th>Last played</th>
-            <th>Name</th>
+            <th>something_here</th>
+            <th>name</th>
             <th>game_id</th>
+            <th>Days ago</th>
         </tr>
     </thead>
     <tbody></tbody>
 </table>
 {% endblock  %}
 
-
 {% block js %}
   {{ super () }}
   <script>
-    $(document).ready(function(){
+    var categories = {
+      footrace_duration: {
+        ids: ["104","108","1901","1","44","46","47","49","53"],
+        columns: ["Best Time","hidden","hidden"],
+        format: ["time","hidden","hidden"],
+        sort: [[1,'asc']]
+      },
+      footrace_remainder: {
+        ids: ["48"],
+        columns: ["Best Time","hidden","hidden"],
+        format: ["time","hidden","hidden"],
+        sort: [[1,'desc']]
+      },
+      racetrack: {
+        ids: ["39","42","54","60"],
+        columns: ["Best Time","Best Lap","hidden"],
+        format: ["time","time","hidden"],
+        sort: [[1,'asc']]
+      },
+      points1: {
+        ids: ["1864"], // cannon cove
+        columns: ["Score","Streak","Accuracy"],
+        format: ["number","number","percent"],
+        sort: [[1,'desc']]
+      },
+      points2: {
+        ids: ["61"], // battle of nimbus station
+        columns: ["Wave","Time","hidden"],
+        format: ["number","time","hidden"],
+        sort: [[1,'desc'],[2,'asc']]
+      },
+      survival: {
+        ids: ["5"],
+        columns: ["Points","Time","hidden"],
+        format: ["number","time","hidden"],
+        sort: [[1,'desc']]
+      }
+    };
+    function toHHMMSS(value) {
+      // Borrowed from https://datatables.net/forums/discussion/54988/converting-time-in-seconds-to-format-hh-mm-ss
+      var sec_num = value; // don't forget the second param
+      var hours   = Math.floor(sec_num / 3600);
+      var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+      var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+      if (hours   < 10) {hours   = "0"+hours;}
+      if (minutes < 10) {minutes = "0"+minutes;}
+      if (seconds < 10) {seconds = "0"+seconds;}
+      return hours+':'+minutes+':'+seconds;
+    }
+    function render_value(data,type,row,meta) {
+      let format = "hidden"
+      let output = ""
+      let f = document.querySelector('[selected=""]');
+      if (f && f.hasAttribute("value")) {
+        let selected_id = f.value;
+        let col = meta.col;
+        for (let key in categories) {
+          if (categories[key]["ids"].includes(selected_id.toString())) {
+            format = categories[key]["format"][col-1]
+          }
+        }
+      };
+      switch(format) {
+        case "time":
+          output = toHHMMSS(data).slice(0, 12);
+          break;
+        case "percent":
+          output = Number(data).toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2});
+          break;
+        default:
+          //passthrough
+          output = data;
+      }
+      return output;
+    }
+
+    $(document).ready(function() {
         let leaderboards_table = $('#leaderboards_table').DataTable({
             "processing": true,
             "serverSide": true,
             "ordering": true,
+            "orderMulti": true,
             "ajax": "{{ url_for('leaderboards.get', id=id) }}",
             "columnDefs": [
               { "searchable": false, "targets": [7] },
-              { "orderable": false, "targets": [7] },
-              { "visible": false, "targets": [2,3,6,7] }
+              { "orderable": false, "targets": [6] }, // pretty date
+              { "visible": false, "targets": [2,3,6,7,8] },
+              { "render": function(data, type, row, meta) { return render_value(data,type,row,meta) }, "targets": [1,2,3]},
             ]
           });
-          let f = document.querySelector('[selected=""]');
-          var categories = {
-            footrace_duration: {
-              ids: ["104","108","1901","1","44","46","47","49","53"],
-              columns: ["Best Time","hidden","hidden"],
-              sort: [[1,'asc']]
-            },
-            footrace_remainder: {
-              ids: ["48"],
-              columns: ["Best Time","hidden","hidden"],
-              sort: [[1,'desc']]
-            },
-            racetrack: {
-              ids: ["39","42","54","60"],
-              columns: ["Best Time","Best Lap","hidden"],
-              sort: [[1,'asc']]
-            },
-            points1: {
-              ids: ["1864"], // cannon cove
-              columns: ["Score","Streak","Accuracy"],
-              sort: [[1,'desc']]
-            },
-            points2: {
-              ids: ["61"], // battle of nimbus station
-              columns: ["Wave","Time","hidden"],
-              sort: [[1,'desc'],[2,'asc']]
-            },
-            survival: {
-              ids: ["5"],
-              columns: ["Points","Time","hidden"],
-              sort: [[1,'desc']]
-            }
-          };
           // it might be null on the first load of the page.
+          let f = document.querySelector('[selected=""]');
           if (f && f.hasAttribute("value")) {
             let selected_id = f.value;
             for (let key in categories) {
