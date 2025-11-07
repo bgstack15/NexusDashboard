@@ -155,10 +155,7 @@ class LeaderboardsForm(FlaskForm):
     activity = SelectField(
         'Activity',
         coerce=str,
-        choices=[
-            ("1", "Avant Gardens Monument Race"),
-            ("5", "Avant Gardens Survival"),
-        ],
+        choices=[],
         validators=[validators.DataRequired()]
     )
 
