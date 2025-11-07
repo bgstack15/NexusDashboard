@@ -7,4 +7,4 @@
 flask db upgrade
 
 # RUNNNNNNNNNNNNN
-gunicorn --reload -b :8000 -w 4 wsgi:app
+gunicorn -b :8000 -w 4 wsgi:app
