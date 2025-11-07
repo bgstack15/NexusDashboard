@@ -3,6 +3,7 @@ from flask_user import login_required, current_user
 from datatables import ColumnDT, DataTables
 import time
 from app.models import CharacterInfo, Leaderboard, db
+from app.forms import LeaderBoardsForm
 from app import gm_level, log_audit
 from app.luclient import translate_from_locale
 import xmltodict
@@ -12,11 +13,25 @@ from xml.dom import minidom
 
 leaderboards_blueprint = Blueprint('leaderboards', __name__)
 
-@leaderboards_blueprint.route('/', methods=['GET'])
+@leaderboards_blueprint.route('/', methods=['GET','POST'])
 @login_required
 def index():
+    form = LeaderboardsForm()
+    id = 1
+    if request.method == "POST":
+        id = form.activity
+        #current_app.logger.warn(f"Got a POST for id={id}")
 
-    #leaderboards_data = Leaderboard.query.all()
+    # WIP: populate the choices here
+    choices = [
+        {"id":1, "name": "Avant Gardens Monument Race"},
+        {"id":5, "name": "Avant Gardens Survival"},
+    ]
+    for c in choices:
+        form.activity.choices.append((c["id"],c["name"]))
+
+    # Initial form loads something
+    leaderboards_data = Leaderboard.query.filter(Leaderboard.game_id == id).all()
 
     #current_app.logger.warn(leaderboards_data.as_dict())
     #thisdict = []
@@ -24,12 +39,13 @@ def index():
     #    thisdict.append(row.as_dict())
         #current_app.logger.warn(row)
     #current_app.logger.warn(thisdict)
-    #leaderboards_json = json.dumps(dict(leaderboards_data))
-    leaderboards_json = {}
+    leaderboards_json = json.dumps(dict(leaderboards_data))
 
     return render_template(
         'leaderboards/index.html.j2',
-        leaderboards_json=leaderboards_json
+        activity = activity,
+        leaderboards_json = leaderboards_json,
+        form = form
     )
 
 @leaderboards_blueprint.route('/get/<id>', methods=['GET'])

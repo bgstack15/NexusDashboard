@@ -151,6 +151,19 @@ class ResolveBugReportForm(FlaskForm):
 
     submit = SubmitField('Submit')
 
+class LeaderboardsForm(FlaskForm):
+    # https://explorer.lu/activities
+    activity = SelectField(
+        'Activity: ',
+        coerce=str,
+        choices=[
+            ("1", "Avant Gardens Monument Race"),
+            ("5", "Avant Gardens Survival"),
+        ],
+        validators=[validators.DataRequired()]
+    )
+
+    submit = SubmitField('Submit')
 
 class SendMailForm(FlaskForm):
 
