@@ -1,0 +1,45 @@
+{% extends 'base.html.j2' %}
+
+{% block title %}
+  Leaderboards
+{% endblock title %}
+
+{% block content %}
+  {% if message %}
+    <div class="row">
+      <div class="col text-center">
+        <h3>{{ message }}</h3>
+      </div>
+    </div>
+    <br/>
+  {% endif %}
+  <table class="table table-dark table-striped table-bordered table-hover" id="leaderboards_table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Time</th>
+            <th>Times played</th>
+            <th>Last played</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+{% endblock  %}
+
+
+{% block js %}
+  {{ super () }}
+  <script>
+    $(document).ready(function(){
+        let leaderboards_table = $('#leaderboards_table').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "ajax": "{{ url_for('leaderboards.get', id='1') }}",
+            "columnDefs": [
+              { "searchable": false, "targets": [0,5] },
+              { "orderable": false, "targets": [0] }
+            ]
+          });
+        });
+  </script>
+{% endblock %}
