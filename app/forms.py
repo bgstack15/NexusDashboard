@@ -79,9 +79,9 @@ class CustomRegisterForm(RegisterForm):
         validators=[CustomRecaptcha()]
     )
     password=PasswordField(
-		'Password',
-		validators=[DataRequired(), password_check]
-	)
+        'Password',
+        validators=[DataRequired(), password_check]
+    )
 
 class CustomLoginForm(LoginForm):
     recaptcha = RecaptchaField(
@@ -152,9 +152,8 @@ class ResolveBugReportForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class LeaderboardsForm(FlaskForm):
-    # https://explorer.lu/activities
     activity = SelectField(
-        'Activity: ',
+        'Activity',
         coerce=str,
         choices=[
             ("1", "Avant Gardens Monument Race"),

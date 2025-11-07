@@ -13,10 +13,10 @@
     </div>
     <br/>
   {% endif %}
-  {# form.csrf_token #}
-  <form method=post>
-    <div class="card shadow-sm mx-auto pb-3 bg-dark border-primary" style="width: 50rem;">
-      {{ helper.render_field(form.activity) }}
+  <form id="activityForm" method=post>
+    <div class="" style="width: 50rem;">
+      {{ form.csrf_token }}
+      {{ helper.render_field(form.activity, submit_on_change=True) }}
       {{ helper.render_submit_field(form.submit) }}
     </div>
   </form>
@@ -24,9 +24,13 @@
     <thead>
         <tr>
             <th>Name</th>
-            <th>Time</th>
+            <th>Primary</th>
+            <th>Secondary</th>
+            <th>Tertiary</th>
             <th>Times played</th>
             <th>Last played</th>
+            <th>Name</th>
+            <th>game_id</th>
         </tr>
     </thead>
     <tbody></tbody>
@@ -41,12 +45,16 @@
         let leaderboards_table = $('#leaderboards_table').DataTable({
             "processing": true,
             "serverSide": true,
-            "ajax": "{{ url_for('leaderboards.get', id='1') }}",
+            "ajax": "{{ url_for('leaderboards.get', id=id) }}",
             "columnDefs": [
-              { "searchable": false, "targets": [0,5] },
-              { "orderable": false, "targets": [0] }
+              { "searchable": false, "targets": [7] },
+              { "orderable": false, "targets": [7] },
+              { "visible": false, "targets": [6,7] }
             ]
           });
         });
+    function submitForm() {
+      document.getElementById("activityForm").submit();
+    }
   </script>
 {% endblock %}
