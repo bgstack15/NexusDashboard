@@ -23,9 +23,9 @@
     <thead>
         <tr>
             <th>Name</th>
-            <th>Primary</th>
-            <th>Secondary</th>
-            <th>Tertiary</th>
+            <th id="score1">Best Time</th>
+            <th id="score2">hidden</th>
+            <th id="score3">hidden</th>
             <th>Times played</th>
             <th>Last played</th>
             <th>Name</th>
@@ -44,13 +44,68 @@
         let leaderboards_table = $('#leaderboards_table').DataTable({
             "processing": true,
             "serverSide": true,
+            "ordering": true,
             "ajax": "{{ url_for('leaderboards.get', id=id) }}",
             "columnDefs": [
               { "searchable": false, "targets": [7] },
               { "orderable": false, "targets": [7] },
-              { "visible": false, "targets": [6,7] }
+              { "visible": false, "targets": [2,3,6,7] }
             ]
           });
+          let f = document.querySelector('[selected=""]');
+          var categories = {
+            footrace_duration: {
+              ids: ["104","108","1901","1","44","46","47","49","53"],
+              columns: ["Best Time","hidden","hidden"],
+              sort: [[1,'asc']]
+            },
+            footrace_remainder: {
+              ids: ["48"],
+              columns: ["Best Time","hidden","hidden"],
+              sort: [[1,'desc']]
+            },
+            racetrack: {
+              ids: ["39","42","54","60"],
+              columns: ["Best Time","Best Lap","hidden"],
+              sort: [[1,'asc']]
+            },
+            points1: {
+              ids: ["1864"], // cannon cove
+              columns: ["Score","Streak","Accuracy"],
+              sort: [[1,'desc']]
+            },
+            points2: {
+              ids: ["61"], // battle of nimbus station
+              columns: ["Wave","Time","hidden"],
+              sort: [[1,'desc'],[2,'asc']]
+            },
+            survival: {
+              ids: ["5"],
+              columns: ["Points","Time","hidden"],
+              sort: [[1,'desc']]
+            }
+          };
+          // it might be null on the first load of the page.
+          if (f && f.hasAttribute("value")) {
+            let selected_id = f.value;
+            for (let key in categories) {
+              if (categories[key]["ids"].includes(selected_id.toString())) {
+                for (let i=0 ; i < 3 ; i++) {
+                  // reset column visible to true, but redraw=false, so we can change its heading
+                  leaderboards_table.column(i+1).visible(true,false);
+                  let heading = categories[key]["columns"][i];
+                  document.getElementById(`score${i+1}`).textContent = heading;
+                  leaderboards_table.column(i+1).visible(heading != "hidden",false);
+                }
+                let sortOrder = categories[key]["sort"]
+                let sortConfigObject = []
+                if (sortOrder) {
+                  leaderboards_table.order(sortOrder);
+                }
+              }
+            }
+            leaderboards_table.draw();
+          }
         });
     function submitForm() {
       document.getElementById("activityForm").submit();

@@ -32,7 +32,6 @@ def index(id=1):
     form = LeaderboardsForm()
     if request.method == "POST":
         id = form.activity.data
-        current_app.logger.warn(f"Got a POST for id={id}")
 
     populate_activities()
     for pair in activities:
@@ -40,9 +39,6 @@ def index(id=1):
 
     leaderboards_data = Leaderboard.query.filter(Leaderboard.game_id == id).all()
 
-    current_app.logger.warn(leaderboards_data)
-
-    current_app.logger.warn(f"Right before render for {request.method}, using id={id}")
     return render_template(
         'leaderboards/index.html.j2',
         form = form,
@@ -71,7 +67,6 @@ def get(id):
         ColumnDT(Leaderboard.game_id)          # 7
     ]
     query = db.session.query().select_from(Leaderboard).join(CharacterInfo).filter((Leaderboard.game_id == id) & (CharacterInfo.id == Leaderboard.character_id))
-    #current_app.logger.warn(query)
     params = request.args.to_dict()
     rowTable = DataTables(params, query, columns)
     data = rowTable.output_result()
