@@ -26,6 +26,7 @@
             <th id="score1">Best Time</th>
             <th id="score2">hidden</th>
             <th id="score3">hidden</th>
+            <th id="score4">hidden</th>
             <th>Times played</th>
             <th>Last played</th>
             <th>something_here</th>
@@ -44,38 +45,38 @@
     var categories = {
       footrace_duration: {
         ids: ["104","108","1901","1","44","47","49","53"],
-        columns: ["Best Time","hidden","hidden"],
-        format: ["time","hidden","hidden"],
+        columns: ["Best Time","hidden","hidden","hidden"],
+        format: ["time","hidden","hidden","hidden"],
         sort: [[1,'asc']]
       },
       footrace_remainder: {
         ids: ["46","48"],
-        columns: ["Best Time","hidden","hidden"],
-        format: ["time","hidden","hidden"],
+        columns: ["Best Time","hidden","hidden","hidden"],
+        format: ["time","hidden","hidden","hidden"],
         sort: [[1,'desc']]
       },
       racetrack: {
         ids: ["39","42","54","60"],
-        columns: ["Best Time","Best Lap","hidden"],
-        format: ["time","time","hidden"],
+        columns: ["Best Time","Best Lap","hidden","Wins"],
+        format: ["time","time","hidden","number"],
         sort: [[1,'asc']]
       },
       points1: {
         ids: ["1864"], // cannon cove
-        columns: ["Score","Streak","Accuracy"],
-        format: ["number","number","percent"],
+        columns: ["Score","Streak","Accuracy","hidden"],
+        format: ["number","number","percent","hidden"],
         sort: [[1,'desc']]
       },
       points2: {
         ids: ["61"], // battle of nimbus station
-        columns: ["Wave","Time","hidden"],
-        format: ["number","time","hidden"],
+        columns: ["Wave","Time","hidden","hidden"],
+        format: ["number","time","hidden","hidden"],
         sort: [[1,'desc'],[2,'asc']]
       },
       survival: {
         ids: ["5"],
-        columns: ["Points","Time","hidden"],
-        format: ["number","time","hidden"],
+        columns: ["Points","Time","hidden","hidden"],
+        format: ["number","time","hidden","hidden"],
         sort: [[1,'desc']]
       }
     };
@@ -126,9 +127,9 @@
             "orderMulti": true,
             "ajax": "{{ url_for('leaderboards.get', id=id) }}",
             "columnDefs": [
-              { "searchable": false, "targets": [7] },
-              { "orderable": false, "targets": [6] }, // pretty date
-              { "visible": false, "targets": [2,3,6,7,8] },
+              { "searchable": false, "targets": [8] },
+              { "orderable": false, "targets": [7] }, // pretty date
+              { "visible": false, "targets": [2,3,7,8,9] },
               { "render": function(data, type, row, meta) { return render_value(data,type,row,meta) }, "targets": [1,2,3]},
             ]
           });
@@ -138,7 +139,7 @@
             let selected_id = f.value;
             for (let key in categories) {
               if (categories[key]["ids"].includes(selected_id.toString())) {
-                for (let i=0 ; i < 3 ; i++) {
+                for (let i=0 ; i < 4 ; i++) {
                   // reset column visible to true, but redraw=false, so we can change its heading
                   leaderboards_table.column(i+1).visible(true,false);
                   let heading = categories[key]["columns"][i];

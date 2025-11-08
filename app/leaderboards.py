@@ -49,26 +49,27 @@ def get(id):
         ColumnDT(Leaderboard.primaryScore),    # 1
         ColumnDT(Leaderboard.secondaryScore),  # 2
         ColumnDT(Leaderboard.tertiaryScore),   # 3
-        ColumnDT(Leaderboard.timesPlayed),     # 4
-        ColumnDT(Leaderboard.last_played),     # 5
+        ColumnDT(Leaderboard.numWins),         # 4
+        ColumnDT(Leaderboard.timesPlayed),     # 5
         ColumnDT(Leaderboard.last_played),     # 6
-        ColumnDT(CharacterInfo.name),          # 7
-        ColumnDT(Leaderboard.game_id),         # 8
-        ColumnDT(Leaderboard.last_played),     # 9
+        ColumnDT(Leaderboard.last_played),     # 7
+        ColumnDT(CharacterInfo.name),          # 8
+        ColumnDT(Leaderboard.game_id),         # 9
+        ColumnDT(Leaderboard.last_played),     # 10
     ]
     query = db.session.query().select_from(Leaderboard).join(CharacterInfo).filter((Leaderboard.game_id == id) & (CharacterInfo.id == Leaderboard.character_id))
     params = request.args.to_dict()
     rowTable = DataTables(params, query, columns)
     data = rowTable.output_result()
     for leaderboard in data["data"]:
-        id = leaderboard["0"]
+        char_id = leaderboard["0"]
         leaderboard["0"] = f"""
             <div class="d-none">{id}</div>
             <a role="button" class="btn btn-primary btn btn-block"
-                href='{url_for('characters.view', id=id)}'>
-                {leaderboard["7"]}
+                href='{url_for('characters.view', id=char_id)}'>
+                {leaderboard["8"]}
             </a>
         """
-        days = (datetime.datetime.today() - leaderboard["6"]).days
-        leaderboard["9"] = days
+        days = (datetime.datetime.today() - leaderboard["7"]).days
+        leaderboard["10"] = days
     return data
