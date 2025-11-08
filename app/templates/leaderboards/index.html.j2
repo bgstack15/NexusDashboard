@@ -154,6 +154,10 @@
               }
             }
             leaderboards_table.draw();
+          } else {
+            // select first entry so the submit will load the data formatting.
+            document.getElementById("activity").getElementsByTagName("option")[0].setAttribute("selected","");
+            document.getElementById("activityForm").submit();
           }
         });
     function submitForm() {
