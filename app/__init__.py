@@ -188,6 +188,27 @@ def register_logging(app):
     app.logger.addHandler(file_handler)
 
 
+# Adapted from from https://stackoverflow.com/a/73710929
+def valtobool (val):
+    """Convert a string representation of truth to true (1) or false (0).
+
+    True values are case insensitive 'y', 'yes', 't', 'true', 'on', and '1'.
+    false values are case insensitive 'n', 'no', 'f', 'false', 'off', and '0'.
+    Raises ValueError if 'val' is anything else.
+    """
+    if type(val) == bool:
+        return val
+    elif type(val) == int:
+        val = str(val)
+    val = val.lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return True
+    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+        return False
+    else:
+        raise ValueError("invalid truth value %r" % (val,))
+
+
 def register_settings(app):
     """Register setting from setting and env
 
@@ -222,30 +243,30 @@ def register_settings(app):
         'APP_DATABASE_URI',
         app.config['APP_DATABASE_URI']
     )
-    app.config['USER_ENABLE_REGISTER'] = os.getenv(
+    app.config['USER_ENABLE_REGISTER'] = valtobool(os.getenv(
         'USER_ENABLE_REGISTER',
         app.config['USER_ENABLE_REGISTER']
-    )
-    app.config['USER_ENABLE_EMAIL'] = os.getenv(
+    ))
+    app.config['USER_ENABLE_EMAIL'] = valtobool(os.getenv(
         'USER_ENABLE_EMAIL',
         app.config['USER_ENABLE_EMAIL']
-    )
-    app.config['USER_ENABLE_CONFIRM_EMAIL'] = os.getenv(
+    ))
+    app.config['USER_ENABLE_CONFIRM_EMAIL'] = valtobool(os.getenv(
         'USER_ENABLE_CONFIRM_EMAIL',
         app.config['USER_ENABLE_CONFIRM_EMAIL']
-    )
-    app.config['REQUIRE_PLAY_KEY'] = os.getenv(
+    ))
+    app.config['REQUIRE_PLAY_KEY'] = valtobool(os.getenv(
         'REQUIRE_PLAY_KEY',
         app.config['REQUIRE_PLAY_KEY']
-    )
-    app.config['USER_ENABLE_INVITE_USER'] = os.getenv(
+    ))
+    app.config['USER_ENABLE_INVITE_USER'] = valtobool(os.getenv(
         'USER_ENABLE_INVITE_USER',
         app.config['USER_ENABLE_INVITE_USER']
-    )
-    app.config['USER_REQUIRE_INVITATION'] = os.getenv(
+    ))
+    app.config['USER_REQUIRE_INVITATION'] = valtobool(os.getenv(
         'USER_REQUIRE_INVITATION',
         app.config['USER_REQUIRE_INVITATION']
-    )
+    ))
     app.config['MAIL_SERVER'] = os.getenv(
         'MAIL_SERVER',
         app.config['MAIL_SERVER']
@@ -256,14 +277,14 @@ def register_settings(app):
         app.config['MAIL_PORT']
         )
     )
-    app.config['MAIL_USE_SSL'] = os.getenv(
+    app.config['MAIL_USE_SSL'] = valtobool(os.getenv(
         'MAIL_USE_SSL',
         app.config['MAIL_USE_SSL']
-    )
-    app.config['MAIL_USE_TLS'] = os.getenv(
+    ))
+    app.config['MAIL_USE_TLS'] = valtobool(os.getenv(
         'MAIL_USE_TLS',
         app.config['MAIL_USE_TLS']
-    )
+    ))
     app.config['MAIL_USERNAME'] = os.getenv(
         'MAIL_USERNAME',
         app.config['MAIL_USERNAME']
@@ -283,10 +304,10 @@ def register_settings(app):
 
     if "ENABLE_CHAR_XML_UPLOAD" not in app.config:
         app.config['ENABLE_CHAR_XML_UPLOAD'] = False
-    app.config['ENABLE_CHAR_XML_UPLOAD'] = os.getenv(
+    app.config['ENABLE_CHAR_XML_UPLOAD'] = valtobool(os.getenv(
         'ENABLE_CHAR_XML_UPLOAD',
         app.config['ENABLE_CHAR_XML_UPLOAD']
-    )
+    ))
 
     if "CLIENT_LOCATION" not in app.config:
         app.config['CLIENT_LOCATION'] = 'app/luclient/'
@@ -312,10 +333,10 @@ def register_settings(app):
     # Recaptcha settings
     if "RECAPTCHA_ENABLE" not in app.config:
         app.config['RECAPTCHA_ENABLE'] = False
-    app.config['RECAPTCHA_ENABLE'] = os.getenv(
+    app.config['RECAPTCHA_ENABLE'] = valtobool(os.getenv(
         'RECAPTCHA_ENABLE',
         app.config['RECAPTCHA_ENABLE']
-    )
+    ))
     if "RECAPTCHA_PUBLIC_KEY" not in app.config:
         app.config['RECAPTCHA_PUBLIC_KEY'] = ''
     app.config['RECAPTCHA_PUBLIC_KEY'] = os.getenv(
