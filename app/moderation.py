@@ -51,15 +51,14 @@ def get_pets(status="all"):
         ColumnDT(PetNames.pet_name),
         ColumnDT(PetNames.approved),
         ColumnDT(PetNames.owner_id),
+        ColumnDT(CharacterInfo.name),
     ]
 
-    query = None
-    if status == "approved":
-        query = db.session.query().select_from(PetNames).filter(PetNames.approved == 2)
-    elif status == "unapproved":
-        query = db.session.query().select_from(PetNames).filter(PetNames.approved == 1)
-    else:
-        query = db.session.query().select_from(PetNames)
+    query = db.session.query().select_from(PetNames).join(
+        CharacterInfo, CharacterInfo.id == PetNames.owner_id
+    )
+    if status in ["approved","unapproved"]:
+        query = query.filter(PetNames.approved == int(2 if status == "approved" else 1))
 
     params = request.args.to_dict()
 
@@ -109,7 +108,7 @@ def get_pets(status="all"):
                 pet_data["3"] = f"""
                     <a role="button" class="btn btn-primary btn btn-block"
                         href='{url_for('characters.view', id=pet_data["3"])}'>
-                        {CharacterInfo.query.filter(CharacterInfo.id==pet_data['3']).first().name}
+                        {pet_data["4"]}
                     </a>
                 """
             except Exception:
