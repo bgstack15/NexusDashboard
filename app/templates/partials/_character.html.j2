@@ -49,6 +49,10 @@
               View Character
             </a>
         </div>
+        <div class="text-center">
+          <div id="equipped_{{ character.id }}">
+          </div>
+        </div>
       </div>
     {% else %}
       <br/>
@@ -113,3 +117,10 @@
 
   </div>
 </div>
+<script>
+  fetch({{ url_for("characters.inventory", id=character.id, inventory_id="equipped")|tojson }})
+      .then(response => response.text())
+      .then(text => {
+        setInnerHTML(document.getElementById("equipped_{{ character.id }}"), text);
+      })
+</script>
