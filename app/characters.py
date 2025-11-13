@@ -187,7 +187,7 @@ def inventory(id, inventory_id):
                 "i": [e for e in [i for i in character_json["obj"]["inv"]["holdings"]["in"] if i["attr_t"] == "0"][0]["i"] if e["attr_eq"] == "true"]
             }
         except TypeError:
-            current_app.logger.trace(f"Character {character_data.name} has no equipped items.")
+            current_app.logger.info(f"Character {character_data.name} has no equipped items.")
         return render_template(
             'partials/charxml/_inventory.html.j2',
             inventory=equipped_inv
