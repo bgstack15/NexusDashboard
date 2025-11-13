@@ -135,23 +135,10 @@ def chardata(id):
                 if "i" in inv.keys() and type(inv["i"]) == list:
                     inv["i"] = sorted(inv["i"], key=lambda i: int(i['attr_s']))
 
-    # print json for reference
-    with open("errorchar.json", "a") as file:
-        file.write(
-            json.dumps(character_json, indent=4)
-        )
-
-    # goal: get all equipped items in a special equipped json
-    # get inventory 0, which is all items held by character, and then all items from it that are equipped=true
-    equipped_inv = {
-        "i": [e for e in [i for i in character_json["obj"]["inv"]["holdings"]["in"] if i["attr_t"] == "0"][0]["i"] if e["attr_eq"] == "true"]
-    }
-
     return render_template(
         'partials/_charxml.html.j2',
         character_data=character_data,
-        character_json=character_json,
-        equipped_inv=equipped_inv
+        character_json=character_json
     )
 
 @character_blueprint.route('/inventory/<id>/<inventory_id>', methods=['GET'])
@@ -188,6 +175,16 @@ def inventory(id, inventory_id):
         for inv in character_json["obj"]["inv"]["holdings"]["in"]:
                 if "i" in inv.keys() and type(inv["i"]) == list:
                     inv["i"] = sorted(inv["i"], key=lambda i: int(i['attr_s']))
+    if "equipped" == inventory_id:
+        # goal: get all equipped items in a special equipped json
+        # get inventory 0, which is all items held by character, and then all items from it that are equipped=true
+        equipped_inv = {
+            "i": [e for e in [i for i in character_json["obj"]["inv"]["holdings"]["in"] if i["attr_t"] == "0"][0]["i"] if e["attr_eq"] == "true"]
+        }
+        return render_template(
+            'partials/charxml/_inventory.html.j2',
+            inventory=equipped_inv
+        )
     for inventory in character_json["obj"]["inv"]["holdings"]["in"]:
         if inventory["attr_t"] == inventory_id:
             return render_template(
