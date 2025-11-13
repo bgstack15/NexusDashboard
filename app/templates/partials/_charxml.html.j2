@@ -85,6 +85,9 @@
       Inventory
     </button>
     </a>
+    <hr class="bg-primary"/>
+    <div id="equipped">
+    </div>
   </div>
 </div>
 
@@ -234,5 +237,10 @@
       .then(response => response.text())
       .then(text => {
         setInnerHTML(document.getElementById("nav-behaviors"), text);
+      })
+  fetch({{ url_for("characters.inventory", id=character_data.id, inventory_id="equipped")|tojson }})
+      .then(response => response.text())
+      .then(text => {
+        setInnerHTML(document.getElementById("equipped"), text);
       })
 </script>

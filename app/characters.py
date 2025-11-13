@@ -9,6 +9,7 @@ from app.luclient import translate_from_locale
 import xmltodict
 import xml.etree.ElementTree as ET
 import json
+import re
 from xml.dom import minidom
 
 
@@ -175,6 +176,22 @@ def inventory(id, inventory_id):
         for inv in character_json["obj"]["inv"]["holdings"]["in"]:
                 if "i" in inv.keys() and type(inv["i"]) == list:
                     inv["i"] = sorted(inv["i"], key=lambda i: int(i['attr_s']))
+    if "equipped" == inventory_id:
+        # goal: get all equipped items in a special equipped json
+        # get inventory 0, which is all items held by character, and then all items from it that are equipped=true
+        equipped_inv = {
+            "i": []
+        }
+        try:
+            equipped_inv = {
+                "i": [e for e in [i for i in character_json["obj"]["inv"]["holdings"]["in"] if i["attr_t"] == "0"][0]["i"] if e["attr_eq"] == "true"]
+            }
+        except TypeError:
+            current_app.logger.trace(f"Character {character_data.name} has no equipped items.")
+        return render_template(
+            'partials/charxml/_inventory.html.j2',
+            inventory=equipped_inv
+        )
     for inventory in character_json["obj"]["inv"]["holdings"]["in"]:
         if inventory["attr_t"] == inventory_id:
             return render_template(
@@ -333,6 +350,7 @@ def get(status):
         ColumnDT(CharacterInfo.needs_rename),       # 4
         ColumnDT(CharacterInfo.last_login),         # 5
         ColumnDT(CharacterInfo.permission_map),     # 6
+        ColumnDT(CharacterInfo.name),               # 7 to be used for equipped-inv
     ]
 
     query = None
@@ -399,5 +417,10 @@ def get(status):
 
         if perm_map & (1 << 6):
             character["6"] += "Restricted Chat</br>"
+
+        if character["7"]:
+            equipped = re.sub(" +", " ",inventory(id, "equipped"))
+            equipped = re.sub(" ?\n+", "\n", equipped)
+            character["7"] = equipped
 
     return data
