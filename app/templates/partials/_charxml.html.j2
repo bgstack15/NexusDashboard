@@ -85,6 +85,12 @@
       Inventory
     </button>
     </a>
+    <hr class="bg-primary"/>
+    <div id="equipped">
+    {% with inventory=equipped_inv %}
+      {% include 'partials/charxml/_inventory.html.j2' %}
+    {% endwith %}
+    </div>
   </div>
 </div>
 
