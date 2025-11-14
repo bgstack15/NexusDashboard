@@ -16,8 +16,14 @@
     <div>
       {{ form.csrf_token }}
       {{ helper.render_field(form.activity, submit_on_change=True) }}
-      {{ helper.render_field(form.scope, submit_on_change=True) }}
-      {{ helper.render_field(form.timeframe, submit_on_change=True) }}
+      <div class="row">
+        <div class="col">
+          {{ helper.render_field(form.scope, submit_on_change=True) }}
+        </div>
+        <div class="col">
+          {{ helper.render_field(form.timeframe, submit_on_change=True) }}
+        </div>
+      </div>
       {# HIDDEN helper.render_submit_field(form.submit) #}
     </div>
   </form>
