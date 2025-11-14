@@ -164,6 +164,12 @@ class LeaderboardsForm(FlaskForm):
         choices=[],
         validators=[validators.DataRequired()]
     )
+    timeframe = SelectField(
+        'Timeframe',
+        coerce=str,
+        choices=[],
+        validators=[validators.DataRequired()]
+    )
 
     submit = SubmitField('Submit')
 

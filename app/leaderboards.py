@@ -33,13 +33,17 @@ def populate_activities():
 def index(id=1):
     form = LeaderboardsForm()
     scope = "all"
+    timeframe = "week"
     if request.method == "POST":
         id = form.activity.data
         scope = form.scope.data
+        timeframe = form.timeframe.data
 
     populate_activities()
     for pair in activities:
         form.activity.choices.append(pair)
+    for i in [("week","Weekly"),("all","All time")]:
+        form.timeframe.choices.append(i)
 
     # list characters for current user
     chars = CharacterInfo.query.filter(CharacterInfo.account_id == current_user.id).all()
@@ -54,11 +58,12 @@ def index(id=1):
         form = form,
         id = id,
         scope = scope,
+        timeframe = timeframe,
     )
 
-@leaderboards_blueprint.route('/get/<id>/<scope>', methods=['GET'])
+@leaderboards_blueprint.route('/get/<id>/<timeframe>/<scope>', methods=['GET'])
 @login_required
-def get(id,scope):
+def get(id,timeframe = "all", scope = "all"):
     columns = [
         ColumnDT(Leaderboard.character_id),    # 0
         ColumnDT(Leaderboard.primaryScore),    # 1
@@ -72,10 +77,19 @@ def get(id,scope):
         ColumnDT(Leaderboard.game_id),         # 9
         ColumnDT(Leaderboard.last_played),     # 10
     ]
+    today = datetime.datetime.today()
 
     query = db.session.query().select_from(Leaderboard).join(CharacterInfo).filter((Leaderboard.game_id == id) & (CharacterInfo.id == Leaderboard.character_id))
 
-    if scope != "all":
+    current_app.logger.warn(f"Got timeframe {timeframe}")
+    if "week" == timeframe:
+        start_date = today - datetime.timedelta(weeks=1)
+        end_date = today
+        current_app.logger.warn(f"Trying to filter to this stuff: between({start_date},{end_date})")
+        query = query.filter(
+            Leaderboard.last_played.between(start_date,end_date)
+        )
+    if "all" != scope:
         char_id = scope
         friends = Friends.query.filter(
             or_(Friends.player_id == char_id, Friends.friend_id == char_id)
@@ -98,6 +112,6 @@ def get(id,scope):
                 {leaderboard["8"]}
             </a>
         """
-        days = (datetime.datetime.today() - leaderboard["7"]).days
+        days = (today - leaderboard["7"]).days
         leaderboard["10"] = days
     return data
