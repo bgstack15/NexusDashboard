@@ -16,6 +16,7 @@
     <div>
       {{ form.csrf_token }}
       {{ helper.render_field(form.activity, submit_on_change=True) }}
+      {{ helper.render_field(form.scope, submit_on_change=True) }}
       {# HIDDEN helper.render_submit_field(form.submit) #}
     </div>
   </form>
@@ -125,7 +126,7 @@
             "serverSide": true,
             "ordering": true,
             "orderMulti": true,
-            "ajax": "{{ url_for('leaderboards.get', id=id) }}",
+            "ajax": "{{ url_for('leaderboards.get', id=id, scope=scope) }}",
             "columnDefs": [
               { "searchable": false, "targets": [8] },
               { "orderable": false, "targets": [7] }, // pretty date

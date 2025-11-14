@@ -1,10 +1,16 @@
 from flask import render_template, Blueprint, url_for, request, current_app
-from flask_user import login_required
+from flask_user import login_required, current_user
 from datatables import ColumnDT, DataTables
 import time, datetime
-from app.models import CharacterInfo, Leaderboard, db
+from app.models import (
+    CharacterInfo,
+    Leaderboard,
+    Friends,
+    db
+)
 from app.forms import LeaderboardsForm
 from app.luclient import translate_from_locale
+from sqlalchemy import or_
 
 leaderboards_blueprint = Blueprint('leaderboards', __name__)
 
@@ -26,24 +32,33 @@ def populate_activities():
 @login_required
 def index(id=1):
     form = LeaderboardsForm()
+    scope = "all"
     if request.method == "POST":
         id = form.activity.data
+        scope = form.scope.data
 
     populate_activities()
     for pair in activities:
         form.activity.choices.append(pair)
 
-    leaderboards_data = Leaderboard.query.filter(Leaderboard.game_id == id).all()
+    # list characters for current user
+    chars = CharacterInfo.query.filter(CharacterInfo.account_id == current_user.id).all()
+    chars2 = [("f_" + str(i.id), "Friends of " + str(i.name)) for i in chars]
+    for i in [("all","All")] + chars2:
+        form.scope.choices.append(i)
+    if scope.startswith("f_"):
+        scope = scope.split("_")[-1]
 
     return render_template(
         'leaderboards/index.html.j2',
         form = form,
         id = id,
+        scope = scope,
     )
 
-@leaderboards_blueprint.route('/get/<id>', methods=['GET'])
+@leaderboards_blueprint.route('/get/<id>/<scope>', methods=['GET'])
 @login_required
-def get(id):
+def get(id,scope):
     columns = [
         ColumnDT(Leaderboard.character_id),    # 0
         ColumnDT(Leaderboard.primaryScore),    # 1
@@ -57,7 +72,20 @@ def get(id):
         ColumnDT(Leaderboard.game_id),         # 9
         ColumnDT(Leaderboard.last_played),     # 10
     ]
+
     query = db.session.query().select_from(Leaderboard).join(CharacterInfo).filter((Leaderboard.game_id == id) & (CharacterInfo.id == Leaderboard.character_id))
+
+    if scope != "all":
+        char_id = scope
+        friends = Friends.query.filter(
+            or_(Friends.player_id == char_id, Friends.friend_id == char_id)
+        ).all()
+        friends_list = []
+        for f in friends:
+            for i in [f.player_id, f.friend_id]:
+                if i not in friends_list:
+                    friends_list.append(i)
+        query = query.filter(Leaderboard.character_id.in_(friends_list))
     params = request.args.to_dict()
     rowTable = DataTables(params, query, columns)
     data = rowTable.output_result()
